@@ -1,49 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ChatGPT Interaction</title>
-    <style>
-        body { font-family: Arial; max-width: 600px; margin: 40px auto; }
-        #chat-box { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; margin-bottom: 10px; }
-        .user { font-weight: bold; margin-top: 10px; }
-        .bot { margin-bottom: 10px; }
-        input, button { padding: 10px; font-size: 16px; }
-    </style>
+    <title>ChatGPT Chat</title>
 </head>
 <body>
     <h2>Chat with ChatGPT</h2>
-    <div id="chat-box"></div>
-    <input type="text" id="user-input" placeholder="Type your message..." style="width: 80%;" />
+    <div id="chat-box" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto;"></div>
+    <input type="text" id="user-input" placeholder="Type a message..." />
     <button onclick="sendMessage()">Send</button>
 
     <script>
+        const params = new URLSearchParams(window.location.search);
+        const participantId = params.get("participant_id") || "unknown";
+
         function sendMessage() {
             const input = document.getElementById("user-input");
-            const chatBox = document.getElementById("chat-box");
             const message = input.value;
+            const chatBox = document.getElementById("chat-box");
+
             if (!message) return;
 
-            const userDiv = document.createElement("div");
-            userDiv.className = "user";
-            userDiv.textContent = "You: " + message;
-            chatBox.appendChild(userDiv);
+            const userMsg = document.createElement("div");
+            userMsg.textContent = "You: " + message;
+            chatBox.appendChild(userMsg);
 
             fetch("/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({
+                    message: message,
+                    participant_id: participantId
+                })
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                const botDiv = document.createElement("div");
-                botDiv.className = "bot";
-                botDiv.textContent = "ChatGPT: " + data.response;
-                chatBox.appendChild(botDiv);
+                const botMsg = document.createElement("div");
+                botMsg.textContent = "ChatGPT: " + data.response;
+                chatBox.appendChild(botMsg);
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
 
             input.value = "";
         }
     </script>
+
 </body>
 </html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatGPT Interaction</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 40px auto; }
+        #chat-box { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; margin-bottom: 10px; }
+        .user { font-weight: bold; margin-top: 10px; }
+        .bot { margin-bottom: 10px; }
+        input, button { padding: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h2>Chat with ChatGPT</h2>
+    <div id="chat-box"></div>
+    <input type="text" id="user-input" placeholder="Type your message..." style="width: 80%;" />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById("user-input");
+            const chatBox = document.getElementById("chat-box");
+            const message = input.value;
+            if (!message) return;
+
+            const userDiv = document.createElement("div");
+            userDiv.className = "user";
+            userDiv.textContent = "You: " + message;
+            chatBox.appendChild(userDiv);
+
+            fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botDiv = document.createElement("div");
+                botDiv.className = "bot";
+                botDiv.textContent = "ChatGPT: " + data.response;
+                chatBox.appendChild(botDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+
+            input.value = "";
+        }
+    </script>
+</body>
+</html>
